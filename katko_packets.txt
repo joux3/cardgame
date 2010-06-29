@@ -1,0 +1,26 @@
+Server -> Client:
+
+Packet: gamestart 
+- number of players (int)
+- for every player:
+--- table pos (int)
+--- name (string)
+- your pos
+- your hand cards: 5 x (card)
+
+Packet: table
+- number of players (int)
+- for every player:
+--- table pos (int)
+--- count of hand cards (int)
+--- count of played cards (int)
+--- for every played card:
+------ played card (card)
+- table pos for the one having the turn
+- int, 1 for a defining card to follow, 0 for no card
+(- the defining card of the round)
+
+Client -> Server:
+
+Packet: selectcard
+- the selected card

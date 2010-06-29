@@ -1,0 +1,56 @@
+Client -> Server packets:
+
+Packet: join
+payload: 
+- version (int)
+- player name (string)
+
+Packet: creategame
+payload:
+- game type (string)
+- game name (string)
+
+Packet: joingame
+payload:
+- game id (int)
+
+Packet: leavegame
+payload:
+- game id (int)
+
+Packet: requestlobbylist
+payload: none
+
+Packet: gamechat
+payload:
+- game id (int)
+- string (message)
+
+Server -> Client packets:
+
+Packet: gamemsg
+payload:
+- game id (int)
+- message (string)
+
+Packet: showgame
+payload:
+- game type (string)
+- game id (int)
+- game name (string)
+
+Packet: lobbylist
+payload:
+- entry count (int)
+Per every entry, there is:
+--- game id (int)
+--- game name (string)
+--- player count (int)
+--- max player count (int)
+
+Server <-> Client
+
+Packet: game
+payload:
+- game id (int)
+- more data according to game type, check other docs for their specs
