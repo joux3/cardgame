@@ -109,10 +109,11 @@ public class Katko extends Game {
 				playersIn[pos].tablePos = pos;
 				playersIn[pos].handCardCount = 5;
 				playersIn[pos].name = packet.getString();
-				addText(playersIn[pos].name+" sits at "+pos);
+				playersIn[pos].wins = packet.getInt();
+				//addText(playersIn[pos].name+" sits at "+pos);
 			}
 			myPos = packet.getInt();
-			addText("You sit at "+myPos);
+			//addText("You sit at "+myPos);
 			String handCardInfo = "You got hand cards: ";
 			for (int i = 0; i < 5; i++) {
 				Card card = packet.getCard();
@@ -180,7 +181,7 @@ public class Katko extends Game {
 	}
 
 	private static Point[] playerCardPoints = {new Point(303, 367), new Point(303, -45)}; 
-	private static Point[] playerNamePoints = {new Point(260, 380), new Point(260, 40)};
+	private static Point[] playerNamePoints = {new Point(220, 380), new Point(220, 40)};
 	public void drawGame(Graphics2D g) {
 		g.setColor(Color.BLACK);
 		if (playersIn != null) {
@@ -203,6 +204,7 @@ public class Katko extends Game {
 					//g.drawString("My cards: "+myCards.toString(), p.x, p.y);
 					drawCards(g, player.playedCards, p.x, p.y - 110);
 					g.drawString("You", namePoint.x, namePoint.y);
+					g.drawString("(" + player.wins + " victories)", namePoint.x, namePoint.y+12);
 					//g.drawString("Cards I've played: "+player.playedCards.toString(), p.x, p.y+20);
 				} else {
 					for (int i = 0; i < player.handCardCount; i++) {
@@ -210,6 +212,7 @@ public class Katko extends Game {
 					}
 					drawCards(g, player.playedCards, p.x, p.y+110);
 					g.drawString(player.name, namePoint.x, namePoint.y);
+					g.drawString("(" + player.wins + " victories)", namePoint.x, namePoint.y+12);
 //					g.drawString("Cards played: "+player.playedCards.toString(), p.x, p.y+20);
 				}
 			}
@@ -222,6 +225,7 @@ public class Katko extends Game {
 	private class SittingPlayer {
 		int tablePos; 
 		int handCardCount;
+		int wins;
 		String name;
 		ArrayList<Card> playedCards = new ArrayList<Card>(5);
 	}

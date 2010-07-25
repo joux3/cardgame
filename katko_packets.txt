@@ -5,6 +5,7 @@ Packet: gamestart
 - for every player:
 --- table pos (int)
 --- name (string)
+--- number of wins (int)
 - your pos
 - your hand cards: 5 x (card)
 

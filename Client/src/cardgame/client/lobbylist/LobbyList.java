@@ -107,13 +107,6 @@ public class LobbyList extends JPanel implements ActionListener {
 			maxPlayerCounts[i] = packet.getInt();
 		}
 		gameListModel.updateData(gameIds, gameNames, playerCounts, maxPlayerCounts);
-			/*int[] gameIDs = new int[]{49, 48, 29, 42, 4};
-			String[] gameNames = new String[]{"kebabila", "kik", "känkky", "extratäyte", "lok"};
-			int[] playerCounts = new int[]{1, 0, 2, 3, 4};
-			int[] maxPlayerCounts = new int[]{3, 5, 5, 4, 5};
-			
-			gameListModel.updateData(gameIDs, gameNames, playerCounts, maxPlayerCounts);
-			*/
 	}
 
 	public void actionPerformed(ActionEvent e) {

@@ -15,12 +15,17 @@ import cardgame.server.game.Deck;
 public class Katko extends Game {
 	private boolean gameRunning = false;
 	
+	// contains the table position of the current turn if the game is running
+	// if the game isn't running, it contains the table pos of the latest winner
 	private int turnPos;
 
 	// the first played card of the current round
 	// or the last round if a new round hasn't been started yet
 	private Card definingCard; 
 	
+	// victories by a certain player
+	private HashMap<Player, Integer> victories = new HashMap<Player, Integer>();
+
 	private HashMap<Player, SittingPlayer> playersIn;
 	public Katko(String gameName, Player gameCreator, int gameId)
 	{
@@ -34,7 +39,6 @@ public class Katko extends Game {
 		Deck curDeck = new Deck();
 		curDeck.shuffle();
 		
-		turnPos = 0;
 		int curPos = 0;
 		playersIn = new HashMap<Player, SittingPlayer>();
 		for (Player player : players) {
@@ -50,12 +54,14 @@ public class Katko extends Game {
 			}
 		}
 		System.out.println("Players in this game: "+playersIn.size());
+		turnPos = (turnPos + 1) % playersIn.size();
 		
 		PacketBuilder packet = createGamePacket("gamestart");
 		packet.addInt(playersIn.size());
 		for (Map.Entry<Player, SittingPlayer> entry : playersIn.entrySet()) {
 			packet.addInt(entry.getValue().tablePos);
 			packet.addString(entry.getKey().getPlayerName());
+			packet.addInt(victories.containsKey(entry.getKey()) ? victories.get(entry.getKey()) : 0);
 		}
 	
 		for (Map.Entry<Player, SittingPlayer> entry : playersIn.entrySet()) {
@@ -160,7 +166,10 @@ public class Katko extends Game {
 					if (player.cardsPlayed.size() == 5) {
 						// the game is over
 						gameRunning = false;
-						broadcastText(leadingPlayer.player.getPlayerName()+" won the round! New game starting in 10 seconds.");
+						Player p = leadingPlayer.player;
+						victories.put(p, (victories.containsKey(p) ? victories.get(p) : 0) + 1);
+						broadcastText(p.getPlayerName()+" won the round! New game starting in 10 seconds.");
+						turnPos = leadingPlayer.tablePos;
 						Server.runDelayed(new Runnable() {
 							public void run() {
 								startGame();
