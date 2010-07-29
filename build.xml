@@ -1,0 +1,48 @@
+<project name="cardgame" default="compile" basedir=".">
+	<property name="src" value="src"/>
+	<property name="build" value="bin"/>
+	<property name="dist"  location="dist"/>
+	<property name="lib" location="lib"/>
+
+	<path id="classpath">
+		<fileset dir="${lib}">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+	<target name="init">
+		<tstamp/>
+		<mkdir dir="Client/${build}"/>
+		<mkdir dir="Server/${build}"/>
+		<mkdir dir="${dist}"/>
+	</target>
+
+	<target name="compile" depends="init">
+		<javac srcdir="Server/${src}" destdir="Server/${build}">
+			<classpath refid="classpath"/>
+		</javac>
+		<javac srcdir="Client/${src}" destdir="Client/${build}">
+			<classpath refid="classpath"/>
+			<classpath path="Server/${build}"/>
+		</javac>
+	</target>
+
+	<target name="client_dist" depends="compile">
+		<delete file="${dist}/client.jar"/>
+		<jar destfile="${dist}/client.jar">
+			<fileset dir="Client/${build}"/>
+			<fileset dir="Server/${build}" includes="cardgame/packets/*.class"/>
+			<fileset dir="." includes="images/**/*.gif"/>
+			<zipfileset src="${lib}/mina.jar" includes="**/*.class"/>
+			<zipfileset src="${lib}/slf4j-api.jar" includes="**/*.class"/>
+			<zipfileset src="${lib}/slf4j-nop.jar" includes="**/*.class"/>
+			<zipfileset src="${lib}/trident.jar" includes="**/*.class **/*.properties">
+			</zipfileset>
+			<manifest>
+				<attribute name="Main-Class"
+					value="cardgame.client.Client"/>
+			</manifest>
+		</jar>
+
+	</target>
+</project>
