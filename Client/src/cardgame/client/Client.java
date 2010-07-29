@@ -10,7 +10,6 @@ import java.util.Hashtable;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-
 import org.apache.mina.common.ConnectFuture;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.serialization.ObjectSerializationCodecFactory;
@@ -24,15 +23,18 @@ import cardgame.packets.PacketBuilder;
 import cardgame.packets.PacketParser;
 
 public class Client implements WindowListener {
-	private enum ClientState {CONNECT, LOBBY}; 
-	
+	private enum ClientState {
+		CONNECT, LOBBY
+	};
+
 	public static Client instance;
 
 	private static final int PORT = 4592;
+
 	public static final int CLIENT_VERSION = 1;
 
 	private ClientState clientState;
-	
+
 	private SocketConnector connector;
 
 	private SocketConnectorConfig cfg;
@@ -46,7 +48,7 @@ public class Client implements WindowListener {
 	private ConnectPanel connectPanel;
 
 	public String playerName;
-	
+
 	private Hashtable<Integer, Game> games;
 
 	public static int debugLevel = 0;
@@ -67,24 +69,24 @@ public class Client implements WindowListener {
 			}
 		});
 	}
-	
+
 	public void leftGame(Game game) {
 		if (games.containsValue(game)) {
 			games.remove(game.getGameId());
 		} else {
-			throw new RuntimeException("Tried to remove a game which isn't in the list!");
+			throw new RuntimeException(
+					"Tried to remove a game which isn't in the list!");
 		}
 	}
-	
+
 	// this gets called when a packet arrives
 	public void packetArrived(final PacketParser packet) {
-		//run all the packet handling code on the swing side for easy threading
+		// run all the packet handling code on the swing side for easy threading
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				if (packet.getPacketName().equals("lobbylist")) {
 					lobbyList.gameListPacket(packet);
-				} else
-				if (packet.getPacketName().equals("showgame")) {
+				} else if (packet.getPacketName().equals("showgame")) {
 					String gameType = packet.getString();
 					int gameId = packet.getInt();
 					String gameName = packet.getString();
@@ -92,8 +94,8 @@ public class Client implements WindowListener {
 						Katko gameKatko = new Katko(gameId, gameName);
 						games.put(gameId, gameKatko);
 					}
-				} else
-				if (packet.getPacketName().equals("game") || packet.getPacketName().equals("gamemsg")) {
+				} else if (packet.getPacketName().equals("game")
+						|| packet.getPacketName().equals("gamemsg")) {
 					int gameId = packet.getInt();
 					Game game = games.get(gameId);
 					if (game != null) {
@@ -114,7 +116,7 @@ public class Client implements WindowListener {
 				window.pack();
 				if (debugLevel == 1) {
 					PacketBuilder packet = new PacketBuilder("creategame");
-					packet.addString("katko"); 
+					packet.addString("katko");
 					packet.addString("Testipeli");
 					instance.sendPacket(packet);
 				} else if (debugLevel == 2) {
@@ -125,7 +127,7 @@ public class Client implements WindowListener {
 			}
 		});
 	}
-	
+
 	// forward the packet to the connectionhandler and let it send it
 	public void sendPacket(PacketBuilder packet) {
 		connHandler.sendPacket(packet);
@@ -140,8 +142,8 @@ public class Client implements WindowListener {
 			cf.addListener(connHandler);
 		} catch (UnresolvedAddressException exception) {
 			JOptionPane.showMessageDialog(window,
-					"Failed to resolve the game server address", "Connection error",
-					JOptionPane.ERROR_MESSAGE);
+					"Failed to resolve the game server address",
+					"Connection error", JOptionPane.ERROR_MESSAGE);
 			connectPanel.reset();
 		}
 	}
@@ -175,24 +177,24 @@ public class Client implements WindowListener {
 			connect(debugLevel == 1 ? "Pelaaja A" : "Pelaaja B", "localhost");
 	}
 
-	public static void main(String[] args) { 
+	public static void main(String[] args) {
 		if (args.length > 0 && args[0].equals("-debug1"))
 			debugLevel = 1;
 		if (args.length > 0 && args[0].equals("-debug2"))
 			debugLevel = 2;
 		instance = new Client();
 	}
-	
+
 	public void windowClosing(WindowEvent arg0) {
 		if (!games.isEmpty()) {
-			int answer = JOptionPane.showConfirmDialog(
-				    window,
-				    "Do you really want to close the client and leave all the games?",
-				    "Confirmation",
-				    JOptionPane.YES_NO_OPTION);
+			int answer = JOptionPane
+					.showConfirmDialog(
+							window,
+							"Do you really want to close the client and leave all the games?",
+							"Confirmation", JOptionPane.YES_NO_OPTION);
 			if (answer == JOptionPane.NO_OPTION) {
 				return;
-	        }
+			}
 		}
 		if (clientState != ClientState.CONNECT) {
 			connHandler.closeConnection();
@@ -200,12 +202,22 @@ public class Client implements WindowListener {
 		System.exit(0);
 	}
 
-	
-	//the following exist to implement windowlistener
-	public void windowActivated(WindowEvent arg0) {}
-	public void windowClosed(WindowEvent arg0) {}
-	public void windowDeactivated(WindowEvent arg0) {}
-	public void windowDeiconified(WindowEvent arg0) {}
-	public void windowIconified(WindowEvent arg0) {}
-	public void windowOpened(WindowEvent arg0) {}
+	// the following exist to implement windowlistener
+	public void windowActivated(WindowEvent arg0) {
+	}
+
+	public void windowClosed(WindowEvent arg0) {
+	}
+
+	public void windowDeactivated(WindowEvent arg0) {
+	}
+
+	public void windowDeiconified(WindowEvent arg0) {
+	}
+
+	public void windowIconified(WindowEvent arg0) {
+	}
+
+	public void windowOpened(WindowEvent arg0) {
+	}
 }

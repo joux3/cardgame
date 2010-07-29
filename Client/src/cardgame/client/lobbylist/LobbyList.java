@@ -19,67 +19,70 @@ import cardgame.client.Client;
 import cardgame.packets.PacketBuilder;
 import cardgame.packets.PacketParser;
 
-
 @SuppressWarnings("serial")
 public class LobbyList extends JPanel implements ActionListener {
-	private JTable gameList; 
+	private JTable gameList;
+
 	private GameListModel gameListModel;
+
 	private JButton createGameButton;
+
 	private JTextField gameNameField;
+
 	public LobbyList() {
 		super();
-		
+
 		JTabbedPane tabbedPane = new JTabbedPane();
-		
+
 		JPanel joinGamePanel = new JPanel();
 		joinGamePanel.setLayout(new BorderLayout());
-		
+
 		gameListModel = new GameListModel();
 		gameList = new JTable(gameListModel);
 		gameList.getColumnModel().getColumn(1).setMaxWidth(60);
 		gameList.getColumnModel().getColumn(1).setMinWidth(60);
-		gameList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+		gameList
+				.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 		gameList.setRowSelectionAllowed(true);
 		gameList.setColumnSelectionAllowed(false);
 		JScrollPane scrollPane = new JScrollPane(gameList);
 		scrollPane.setPreferredSize(new Dimension(500, 400));
-		
+
 		joinGamePanel.add(scrollPane, BorderLayout.CENTER);
-		
+
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout());
-		
+
 		JButton joinGameButton = new JButton("Join");
 		joinGameButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					if (gameList.getSelectedRow() != -1) {
-						int gameId = gameListModel.getGameId(gameList.getSelectedRow());
-						PacketBuilder packet = new PacketBuilder("joingame");
-						packet.addInt(gameId);
-						Client.instance.sendPacket(packet);
-					}
-				}			
+			public void actionPerformed(ActionEvent arg0) {
+				if (gameList.getSelectedRow() != -1) {
+					int gameId = gameListModel.getGameId(gameList
+							.getSelectedRow());
+					PacketBuilder packet = new PacketBuilder("joingame");
+					packet.addInt(gameId);
+					Client.instance.sendPacket(packet);
+				}
 			}
-		);
-		
+		});
+
 		JButton refreshListButton = new JButton("Refresh list");
 		refreshListButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					PacketBuilder packet = new PacketBuilder("requestlobbylist");
-					Client.instance.sendPacket(packet);
-				}			
+			public void actionPerformed(ActionEvent arg0) {
+				PacketBuilder packet = new PacketBuilder("requestlobbylist");
+				Client.instance.sendPacket(packet);
 			}
-		);
-		
+		});
+
 		buttonPanel.add(joinGameButton);
 		buttonPanel.add(refreshListButton);
-		
+
 		joinGamePanel.add(buttonPanel, BorderLayout.SOUTH);
-		
+
 		tabbedPane.add("Join a game", joinGamePanel);
-		
+
 		// now the create game tab
-		
+
 		JPanel createGamePanel = new JPanel(new GridLayout(2, 2));
 
 		createGamePanel.add(new JLabel("Game name:"));
@@ -88,12 +91,12 @@ public class LobbyList extends JPanel implements ActionListener {
 		createGameButton = new JButton("Create");
 		createGameButton.addActionListener(this);
 		createGamePanel.add(createGameButton);
-		
+
 		tabbedPane.add("Create a game", createGamePanel);
-		
+
 		super.add(tabbedPane);
 	}
-	
+
 	public void gameListPacket(PacketParser packet) {
 		int gameCount = packet.getInt();
 		int[] gameIds = new int[gameCount];
@@ -106,14 +109,15 @@ public class LobbyList extends JPanel implements ActionListener {
 			playerCounts[i] = packet.getInt();
 			maxPlayerCounts[i] = packet.getInt();
 		}
-		gameListModel.updateData(gameIds, gameNames, playerCounts, maxPlayerCounts);
+		gameListModel.updateData(gameIds, gameNames, playerCounts,
+				maxPlayerCounts);
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == createGameButton) {
 			if (gameNameField.getText().length() > 0) {
 				PacketBuilder packet = new PacketBuilder("creategame");
-				packet.addString("katko"); //TODO needs the other games too
+				packet.addString("katko"); // TODO needs the other games too
 				packet.addString(gameNameField.getText());
 				Client.instance.sendPacket(packet);
 			}

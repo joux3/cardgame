@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JLayeredPane;
 
 import cardgame.client.game.Game;
@@ -26,21 +24,28 @@ import org.pushingpixels.trident.Timeline;
 
 public class Katko extends Game {
 	JKatkoPanel gamePanel;
+
 	private int playerCount;
+
 	private int myPos;
+
 	private int turnPos;
+
 	private ArrayList<Card> myCards;
+
 	private SittingPlayer[] playersIn;
+
 	private Card definingCard;
+
 	public Katko(int gameId, String gameName) {
 		super(gameId, gameName);
-		
+
 		gamePanel = new JKatkoPanel(this);
 		gamePanel.setPreferredSize(new Dimension(700, 400));
 
 		// allow absolute positioning
 		gamePanel.setLayout(null);
-		
+
 		constructGUI(gamePanel);
 	}
 
@@ -59,7 +64,7 @@ public class Katko extends Game {
 			return myCards;
 		return playableCards;
 	}
-	
+
 	public void createHandComponents() {
 		int x = playerCardPoints[0].x;
 		int y = playerCardPoints[0].y;
@@ -82,7 +87,7 @@ public class Katko extends Game {
 		if (getPlayableHandCards().contains(card)) {
 			myCards.remove(card);
 			gamePanel.remove(jcard);
-			PacketBuilder p = createGamePacket("selectcard");	
+			PacketBuilder p = createGamePacket("selectcard");
 			p.addCard(card);
 			sendPacket(p);
 		}
@@ -90,8 +95,9 @@ public class Katko extends Game {
 
 	private JCard getComponentForCard(Card card) {
 		for (Component component : gamePanel.getComponents()) {
-			if (component instanceof JCard && ((JCard)component).getCard().equals(card))
-				return (JCard)component;
+			if (component instanceof JCard
+					&& ((JCard) component).getCard().equals(card))
+				return (JCard) component;
 		}
 		return null;
 	}
@@ -110,10 +116,10 @@ public class Katko extends Game {
 				playersIn[pos].handCardCount = 5;
 				playersIn[pos].name = packet.getString();
 				playersIn[pos].wins = packet.getInt();
-				//addText(playersIn[pos].name+" sits at "+pos);
+				// addText(playersIn[pos].name+" sits at "+pos);
 			}
 			myPos = packet.getInt();
-			//addText("You sit at "+myPos);
+			// addText("You sit at "+myPos);
 			String handCardInfo = "You got hand cards: ";
 			for (int i = 0; i < 5; i++) {
 				Card card = packet.getCard();
@@ -121,18 +127,12 @@ public class Katko extends Game {
 				handCardInfo += card.toString() + (i == 4 ? "." : ", ");
 			}
 			addText(handCardInfo);
-			Collections.sort(myCards, new Comparator() {
-				public int compare(Object o1, Object o2) {
-					Card c1 = (Card)o1;
-					Card c2 = (Card)o2;
+			Collections.sort(myCards, new Comparator<Card>() {
+				public int compare(Card c1, Card c2) {
 					int suitCompare = c1.getSuit().compareTo(c2.getSuit());
-					if (suitCompare != 0)	
+					if (suitCompare != 0)
 						return suitCompare;
 					return c1.getRank().compareTo(c2.getRank());
-				}
-	
-				boolean equals(Object o1, Object o2) {
-					return false; // there shouldn't be any doubles in a deck!
 				}
 			});
 			createHandComponents();
@@ -161,27 +161,34 @@ public class Katko extends Game {
 				Timeline timeline = new Timeline(jcard);
 				timeline.setDuration(250);
 				if (playableCards.contains(card)) {
-					timeline.addPropertyToInterpolate("location", p, new Point(p.x, playerCardPoints[0].y - 5));
+					timeline.addPropertyToInterpolate("location", p, new Point(
+							p.x, playerCardPoints[0].y - 5));
 				} else {
-					timeline.addPropertyToInterpolate("location", p, new Point(p.x, playerCardPoints[0].y));
+					timeline.addPropertyToInterpolate("location", p, new Point(
+							p.x, playerCardPoints[0].y));
 				}
 				timeline.play();
 			}
 			gamePanel.repaint();
 		} else {
-			addText("Got unhandled packet: "+gamePacketName);
+			addText("Got unhandled packet: " + gamePacketName);
 		}
 	}
 
-	private void drawCards(Graphics2D g, java.util.Collection<Card> cards, int x, int y) {
+	private void drawCards(Graphics2D g, java.util.Collection<Card> cards,
+			int x, int y) {
 		for (Card card : cards) {
 			g.drawImage(card.getImage(), x, y, null);
 			x += 25;
 		}
 	}
 
-	private static Point[] playerCardPoints = {new Point(303, 367), new Point(303, -45)}; 
-	private static Point[] playerNamePoints = {new Point(220, 380), new Point(220, 40)};
+	private static Point[] playerCardPoints = { new Point(303, 367),
+			new Point(303, -45) };
+
+	private static Point[] playerNamePoints = { new Point(220, 380),
+			new Point(220, 40) };
+
 	public void drawGame(Graphics2D g) {
 		g.setColor(Color.BLACK);
 		if (playersIn != null) {
@@ -192,28 +199,35 @@ public class Katko extends Game {
 				// perform some magic table pos swapping
 				// ie. always show local player on bottom
 				if (player.tablePos >= playerCardPoints.length) {
-					throw new RuntimeException("Tablepos "+player.tablePos+" out of bounds!");
+					throw new RuntimeException("Tablepos " + player.tablePos
+							+ " out of bounds!");
 				}
-				
+
 				int mappedPos = player.tablePos - myPos;
-				mappedPos = (mappedPos < 0) ? mappedPos + playerCardPoints.length : mappedPos;
+				mappedPos = (mappedPos < 0) ? mappedPos
+						+ playerCardPoints.length : mappedPos;
 
 				Point p = playerCardPoints[mappedPos];
 				Point namePoint = playerNamePoints[mappedPos];
 				if (player.tablePos == myPos) {
-					//g.drawString("My cards: "+myCards.toString(), p.x, p.y);
+					// g.drawString("My cards: "+myCards.toString(), p.x, p.y);
 					drawCards(g, player.playedCards, p.x, p.y - 110);
 					g.drawString("You", namePoint.x, namePoint.y);
-					g.drawString("(" + player.wins + " victories)", namePoint.x, namePoint.y+12);
-					//g.drawString("Cards I've played: "+player.playedCards.toString(), p.x, p.y+20);
+					g.drawString("(" + player.wins + " victories)",
+							namePoint.x, namePoint.y + 12);
+					// g.drawString("Cards I've played:
+					// "+player.playedCards.toString(), p.x, p.y+20);
 				} else {
 					for (int i = 0; i < player.handCardCount; i++) {
-						g.drawImage(Card.getBackImage(), p.x+i*25, p.y, null);
+						g.drawImage(Card.getBackImage(), p.x + i * 25, p.y,
+								null);
 					}
-					drawCards(g, player.playedCards, p.x, p.y+110);
+					drawCards(g, player.playedCards, p.x, p.y + 110);
 					g.drawString(player.name, namePoint.x, namePoint.y);
-					g.drawString("(" + player.wins + " victories)", namePoint.x, namePoint.y+12);
-//					g.drawString("Cards played: "+player.playedCards.toString(), p.x, p.y+20);
+					g.drawString("(" + player.wins + " victories)",
+							namePoint.x, namePoint.y + 12);
+					// g.drawString("Cards played:
+					// "+player.playedCards.toString(), p.x, p.y+20);
 				}
 			}
 		}
@@ -223,25 +237,30 @@ public class Katko extends Game {
 	}
 
 	private class SittingPlayer {
-		int tablePos; 
+		int tablePos;
+
 		int handCardCount;
+
 		int wins;
+
 		String name;
+
 		ArrayList<Card> playedCards = new ArrayList<Card>(5);
 	}
-	
+
 	@SuppressWarnings("serial")
 	private class JKatkoPanel extends JLayeredPane implements MouseListener {
 		Katko katkoInstance;
+
 		public JKatkoPanel(Katko katkoInstance) {
 			super();
 			addMouseListener(this);
 			this.katkoInstance = katkoInstance;
 		}
-		
+
 		protected void paintComponent(Graphics gOld) {
 			super.paintComponent(gOld);
-			Graphics2D g = (Graphics2D)gOld;
+			Graphics2D g = (Graphics2D) gOld;
 			g.setColor(new Color(0, 128, 0));
 			g.fillRect(0, 0, this.getWidth(), this.getHeight());
 			katkoInstance.drawGame(g);
@@ -249,15 +268,22 @@ public class Katko extends Game {
 
 		public void mouseClicked(MouseEvent e) {
 			if (e.getSource() instanceof JCard) {
-				katkoInstance.cardClicked((JCard)e.getSource());
+				katkoInstance.cardClicked((JCard) e.getSource());
 			} else {
 				katkoInstance.mouseClicked(e.getX(), e.getY());
 			}
 		}
-	
-		public void mouseEntered(MouseEvent e) {}
-		public void mouseExited(MouseEvent e) {}
-		public void mousePressed(MouseEvent e) {}
-		public void mouseReleased(MouseEvent e) {}
+
+		public void mouseEntered(MouseEvent e) {
+		}
+
+		public void mouseExited(MouseEvent e) {
+		}
+
+		public void mousePressed(MouseEvent e) {
+		}
+
+		public void mouseReleased(MouseEvent e) {
+		}
 	}
 }

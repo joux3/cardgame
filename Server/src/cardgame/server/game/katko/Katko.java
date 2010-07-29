@@ -14,56 +14,58 @@ import cardgame.server.game.Deck;
 
 public class Katko extends Game {
 	private boolean gameRunning = false;
-	
+
 	// contains the table position of the current turn if the game is running
 	// if the game isn't running, it contains the table pos of the latest winner
 	private int turnPos;
 
 	// the first played card of the current round
 	// or the last round if a new round hasn't been started yet
-	private Card definingCard; 
-	
+	private Card definingCard;
+
 	// victories by a certain player
 	private HashMap<Player, Integer> victories = new HashMap<Player, Integer>();
 
 	private HashMap<Player, SittingPlayer> playersIn;
-	public Katko(String gameName, Player gameCreator, int gameId)
-	{
+
+	public Katko(String gameName, Player gameCreator, int gameId) {
 		super(gameName, gameCreator, gameId);
 	}
-	
+
 	private void startGame() {
 		gameRunning = true;
 		definingCard = null;
-		
+
 		Deck curDeck = new Deck();
 		curDeck.shuffle();
-		
+
 		int curPos = 0;
 		playersIn = new HashMap<Player, SittingPlayer>();
 		for (Player player : players) {
 			SittingPlayer info = new SittingPlayer();
 			playersIn.put(player, info);
 			info.player = player;
-			
+
 			info.tablePos = curPos++;
-			System.out.println(player.getPlayerName() + " sits at "+info.tablePos);
+			System.out.println(player.getPlayerName() + " sits at "
+					+ info.tablePos);
 			// deal five cards
 			for (int i = 0; i < 5; i++) {
 				info.handCards.add(curDeck.deal());
 			}
 		}
-		System.out.println("Players in this game: "+playersIn.size());
+		System.out.println("Players in this game: " + playersIn.size());
 		turnPos = (turnPos + 1) % playersIn.size();
-		
+
 		PacketBuilder packet = createGamePacket("gamestart");
 		packet.addInt(playersIn.size());
 		for (Map.Entry<Player, SittingPlayer> entry : playersIn.entrySet()) {
 			packet.addInt(entry.getValue().tablePos);
 			packet.addString(entry.getKey().getPlayerName());
-			packet.addInt(victories.containsKey(entry.getKey()) ? victories.get(entry.getKey()) : 0);
+			packet.addInt(victories.containsKey(entry.getKey()) ? victories
+					.get(entry.getKey()) : 0);
 		}
-	
+
 		for (Map.Entry<Player, SittingPlayer> entry : playersIn.entrySet()) {
 			PacketBuilder privatePacket = packet.clone();
 			privatePacket.addInt(entry.getValue().tablePos);
@@ -72,10 +74,10 @@ public class Katko extends Game {
 			}
 			entry.getKey().sendPacket(privatePacket);
 		}
-		
+
 		sendTableData();
 	}
-	
+
 	private void sendTableData() {
 		PacketBuilder tablePacket = createGamePacket("table");
 		tablePacket.addInt(playersIn.size());
@@ -83,19 +85,19 @@ public class Katko extends Game {
 			tablePacket.addInt(entry.tablePos);
 			tablePacket.addInt(entry.handCards.size());
 			tablePacket.addInt(entry.cardsPlayed.size());
-			for (Card card : entry.cardsPlayed) 
+			for (Card card : entry.cardsPlayed)
 				tablePacket.addCard(card);
 		}
 		tablePacket.addInt(gameRunning ? turnPos : -1);
 		tablePacket.addInt(definingCard != null ? 1 : 0);
-		if (definingCard != null) 
+		if (definingCard != null)
 			tablePacket.addCard(definingCard);
 
 		for (Player p : playersIn.keySet()) {
 			p.sendPacket(tablePacket);
 		}
 	}
-	
+
 	@Override
 	protected void playerJoined(Player player) {
 		PacketBuilder pb = new PacketBuilder("showgame");
@@ -103,12 +105,12 @@ public class Katko extends Game {
 		pb.addInt(this.getGameId());
 		pb.addString(this.getGameName());
 		player.sendPacket(pb);
-		
+
 		if (!gameRunning && this.getPlayerCount() == this.getMaxPlayerCount()) {
 			startGame();
 		}
 	}
-	
+
 	@Override
 	protected void playerLeftGame(Player disconnecter) {
 		if (gameRunning && playersIn.containsKey(disconnecter)) {
@@ -131,33 +133,39 @@ public class Katko extends Game {
 	@Override
 	protected void handlePacket(Player sender, PacketParser packet) {
 		String name = packet.getString();
-		System.out.println("Got game packet: "+name);
-		if (name.equals("selectcard") && turnPos == playersIn.get(sender).tablePos) {
+		System.out.println("Got game packet: " + name);
+		if (name.equals("selectcard")
+				&& turnPos == playersIn.get(sender).tablePos) {
 			Card card = packet.getCard();
 			SittingPlayer player = playersIn.get(sender);
-			System.out.println(sender.getPlayerName()+" tried to play the card "+card.toString());
-			System.out.println("Players in "+playersIn.size());
+			System.out.println(sender.getPlayerName()
+					+ " tried to play the card " + card.toString());
+			System.out.println("Players in " + playersIn.size());
 			if (player.handCards.contains(card)) {
 				if (definingCard == null) {
 					definingCard = card;
 				}
-				System.out.println(sender.getPlayerName()+" played the card "+card.toString());
+				System.out.println(sender.getPlayerName() + " played the card "
+						+ card.toString());
 				player.cardsPlayed.add(card);
 				player.handCards.remove(card);
-	
+
 				if (isRoundOver()) {
-					// figure out who won the round	
+					// figure out who won the round
 					int roundNumber = player.cardsPlayed.size() - 1;
 					SittingPlayer leadingPlayer = null;
 					Card leadingCard = null;
 					for (SittingPlayer p : playersIn.values()) {
 						// wrong suit
-						if (!definingCard.getSuit().equals(p.cardsPlayed.get(roundNumber).getSuit()))
+						if (!definingCard.getSuit().equals(
+								p.cardsPlayed.get(roundNumber).getSuit()))
 							continue;
 						// beats the leading card or there's no leader
-						if (leadingPlayer == null || leadingCard.getRank().ordinal() < p.cardsPlayed.get(roundNumber).getRank().ordinal()) {
-							leadingPlayer = p;		
-							leadingCard = p.cardsPlayed.get(roundNumber);	
+						if (leadingPlayer == null
+								|| leadingCard.getRank().ordinal() < p.cardsPlayed
+										.get(roundNumber).getRank().ordinal()) {
+							leadingPlayer = p;
+							leadingCard = p.cardsPlayed.get(roundNumber);
 						}
 					}
 					turnPos = leadingPlayer.tablePos;
@@ -167,8 +175,10 @@ public class Katko extends Game {
 						// the game is over
 						gameRunning = false;
 						Player p = leadingPlayer.player;
-						victories.put(p, (victories.containsKey(p) ? victories.get(p) : 0) + 1);
-						broadcastText(p.getPlayerName()+" won the round! New game starting in 10 seconds.");
+						victories.put(p, (victories.containsKey(p) ? victories
+								.get(p) : 0) + 1);
+						broadcastText(p.getPlayerName()
+								+ " won the round! New game starting in 10 seconds.");
 						turnPos = leadingPlayer.tablePos;
 						Server.runDelayed(new Runnable() {
 							public void run() {
@@ -181,15 +191,18 @@ public class Katko extends Game {
 					turnPos++;
 					turnPos = turnPos % playersIn.size();
 				}
-				sendTableData(); 
+				sendTableData();
 			}
 		}
 	}
-	
+
 	private class SittingPlayer {
 		public ArrayList<Card> handCards = new ArrayList<Card>(5);
+
 		public ArrayList<Card> cardsPlayed = new ArrayList<Card>(5);
+
 		int tablePos;
+
 		Player player;
 	}
 }

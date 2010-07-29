@@ -5,7 +5,8 @@ import static org.junit.Assert.*;
 import cardgame.packets.PacketBuilder;
 
 public class PacketBuilderTest {
-	@org.junit.Test public void cloneTest() {
+	@org.junit.Test
+	public void cloneTest() {
 		PacketBuilder packet = new PacketBuilder("lololol");
 		packet.addString("kebab");
 		PacketBuilder packet2 = packet.clone();

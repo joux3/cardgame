@@ -10,7 +10,8 @@ public class Lobby {
 			GameCache.createGame(gameName, sender, gameType);
 		} else if (packet.getPacketName().equals("joingame")) {
 			Game gameToJoin = GameCache.getGame(packet.getInt());
-			if (gameToJoin != null && !sender.getGames().contains(gameToJoin) && gameToJoin.canJoin()) {
+			if (gameToJoin != null && !sender.getGames().contains(gameToJoin)
+					&& gameToJoin.canJoin()) {
 				gameToJoin.addPlayer(sender);
 			}
 		} else if (packet.getPacketName().equals("requestlobbylist")) {
@@ -20,12 +21,12 @@ public class Lobby {
 		}
 		return true;
 	}
-	
+
 	public void sendGameList(Player sendTo) {
-		System.out.println("Sent gamelist to "+sendTo.getPlayerName());
+		System.out.println("Sent gamelist to " + sendTo.getPlayerName());
 		sendTo.sendPacket(GameCache.getLobbyList());
 	}
-	
+
 	public void joinedLobby(Player joiner) {
 		sendGameList(joiner);
 	}

@@ -7,9 +7,10 @@ import java.awt.Image;
 
 import cardgame.server.game.Card;
 
+@SuppressWarnings("serial")
 public class JCard extends JComponent {
 	private Card card;
-	
+
 	// this creates a back card
 	public JCard() {
 		super();
@@ -23,7 +24,7 @@ public class JCard extends JComponent {
 
 	public void init(Card card) {
 		this.card = card;
-		setPreferredSize(new Dimension(73, 97));	
+		setPreferredSize(new Dimension(73, 97));
 	}
 
 	public Card getCard() {

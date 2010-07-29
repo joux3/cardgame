@@ -6,7 +6,6 @@ import java.util.Map;
 import cardgame.packets.PacketBuilder;
 import cardgame.server.game.katko.Katko;
 
-
 public class GameCache {
 	private static int gameIdCounter = 0;
 
@@ -18,7 +17,8 @@ public class GameCache {
 			if (!gameCache.containsKey(gameIdCounter)) {
 				// TODO handle other games too
 				Game newGame = new Katko(name, creator, gameIdCounter);
-				System.out.println("Player "+creator.getPlayerName()+" created game with id "+gameIdCounter);
+				System.out.println("Player " + creator.getPlayerName()
+						+ " created game with id " + gameIdCounter);
 				gameCache.put(gameIdCounter, newGame);
 				return newGame;
 			}
@@ -26,12 +26,13 @@ public class GameCache {
 			gameIdCounter++;
 		}
 	}
-	
+
 	public static void removeGame(Game game) {
 		if (gameCache.containsValue(game))
 			gameCache.remove(game.getGameId());
 		else
-			throw new RuntimeException("Tried to remove an unexisting game from the cache!");
+			throw new RuntimeException(
+					"Tried to remove an unexisting game from the cache!");
 	}
 
 	public static Game getGame(int id) {
