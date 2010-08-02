@@ -89,7 +89,7 @@ public class Card {
 					+ toString() + ".gif"));
 		} catch (Exception e) {
 			try {
-				image = javax.imageio.ImageIO.read(getClass().getResource(
+				image = javax.imageio.ImageIO.read(Card.class.getResource(
 						"/images/cards/" + toString() + ".gif"));
 			} catch (Exception err) {
 			}

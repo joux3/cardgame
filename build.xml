@@ -32,6 +32,7 @@
 		<jar destfile="${dist}/client.jar">
 			<fileset dir="Client/${build}"/>
 			<fileset dir="Server/${build}" includes="cardgame/packets/*.class"/>
+			<fileset dir="Server/${build}" includes="cardgame/server/game/Card.class"/>
 			<fileset dir="." includes="images/**/*.gif"/>
 			<zipfileset src="${lib}/mina.jar" includes="**/*.class"/>
 			<zipfileset src="${lib}/slf4j-api.jar" includes="**/*.class"/>
@@ -43,6 +44,17 @@
 					value="cardgame.client.Client"/>
 			</manifest>
 		</jar>
+	</target>
 
+	<target name="debug" depends="compile">
+		<java classname="cardgame.server.Server" classpath="Client/${build};Server/${build}" classpathref="classpath" spawn="true" fork="true" />
+		<sleep seconds="1" />
+		<java classname="cardgame.client.Client" classpath="Client/${build};Server/${build}" classpathref="classpath" spawn="true" fork="true">
+			<arg value="-debug1"/>
+		</java>
+		<sleep seconds="1" />
+		<java classname="cardgame.client.Client" classpath="Client/${build};Server/${build}" classpathref="classpath" spawn="true" fork="true">
+			<arg value="-debug2"/>
+		</java>
 	</target>
 </project>

@@ -12,7 +12,6 @@ import javax.swing.JOptionPane;
 
 import org.apache.mina.common.ConnectFuture;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.filter.codec.serialization.ObjectSerializationCodecFactory;
 import org.apache.mina.transport.socket.nio.SocketConnector;
 import org.apache.mina.transport.socket.nio.SocketConnectorConfig;
 
@@ -21,6 +20,7 @@ import cardgame.client.game.katko.Katko;
 import cardgame.client.lobbylist.LobbyList;
 import cardgame.packets.PacketBuilder;
 import cardgame.packets.PacketParser;
+import cardgame.packets.PrefixedStringCodecFactory;
 
 public class Client implements WindowListener {
 	private enum ClientState {
@@ -58,7 +58,7 @@ public class Client implements WindowListener {
 		clientState = ClientState.CONNECT;
 		connector = new SocketConnector();
 		cfg = new SocketConnectorConfig();
-		ObjectSerializationCodecFactory codecFactory = new ObjectSerializationCodecFactory();
+		PrefixedStringCodecFactory codecFactory = new PrefixedStringCodecFactory();
 		cfg.getFilterChain().addLast("codec",
 				new ProtocolCodecFilter(codecFactory));
 		connHandler = new ConnectionHandler();

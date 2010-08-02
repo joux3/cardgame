@@ -7,9 +7,11 @@ import org.apache.mina.common.ByteBuffer;
 import org.apache.mina.common.IoAcceptor;
 import org.apache.mina.common.SimpleByteBufferAllocator;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.filter.codec.serialization.ObjectSerializationCodecFactory;
 import org.apache.mina.transport.socket.nio.SocketAcceptor;
 import org.apache.mina.transport.socket.nio.SocketAcceptorConfig;
+
+import cardgame.packets.PrefixedStringCodecFactory;
+
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ScheduledFuture;
 
@@ -34,7 +36,7 @@ public class Server {
 		ByteBuffer.setAllocator(new SimpleByteBufferAllocator());
 
 		SocketAcceptorConfig cfg = new SocketAcceptorConfig();
-		ObjectSerializationCodecFactory codecFactory = new ObjectSerializationCodecFactory();
+		PrefixedStringCodecFactory codecFactory = new PrefixedStringCodecFactory();
 		cfg.getFilterChain().addLast("codec",
 				new ProtocolCodecFilter(codecFactory));
 
