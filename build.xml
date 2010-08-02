@@ -32,7 +32,7 @@
 		<jar destfile="${dist}/client.jar">
 			<fileset dir="Client/${build}"/>
 			<fileset dir="Server/${build}" includes="cardgame/packets/*.class"/>
-			<fileset dir="Server/${build}" includes="cardgame/server/game/Card.class"/>
+			<fileset dir="Server/${build}" includes="cardgame/server/game/Card*.class"/>
 			<fileset dir="." includes="images/**/*.gif"/>
 			<zipfileset src="${lib}/mina.jar" includes="**/*.class"/>
 			<zipfileset src="${lib}/slf4j-api.jar" includes="**/*.class"/>
